@@ -1,0 +1,56 @@
+Session = sessionmaker(bind=eng)
+session = Session()
+
+#1
+stm = text('SELECT count(*) AS count_1, avg(movies.rating) AS avg_1, directors.name AS directors_name, directors.surname AS directors_surname FROM directors INNER JOIN movies ON directors.director_id = movies.director_id WHERE movies.year >= :year1 AND movies.year <= :year2 GROUP BY directors.name, directors.surname')
+result = session.execute(stm, {"year1":2000,"year2":3000}).fetchall()
+print(result)
+
+Session = sessionmaker(bind=eng)
+session = Session()
+
+#1
+stm = text('SELECT count(*) AS count_1, avg(movies.rating) AS avg_1, directors.name AS directors_name, directors.surname AS directors_surname FROM directors INNER JOIN movies ON directors.director_id = movies.director_id WHERE movies.year >= :year1 AND movies.year <= :year2 GROUP BY directors.name, directors.surname')
+stm2 = stm.bindparams(bindparam("year1", type_=Integer), bindparam("year2", type_=Integer))
+result = session.execute(stm2, {"year1":2000,"year2":3000}).fetchall()
+print(result)
+
+Session = sessionmaker(bind=eng)
+session = Session()
+
+#1
+def get_directors_statistics(sess,year_1,year_2):
+    stm = text('SELECT count(*) AS count_1, avg(movies.rating) AS avg_1, directors.name AS directors_name, directors.surname AS directors_surname FROM directors INNER JOIN movies ON directors.director_id = movies.director_id WHERE movies.year >= :year1 AND movies.year <= :year2 GROUP BY directors.name, directors.surname')
+    stm2 = stm.bindparams(bindparam("year1", type_=Integer), bindparam("year2", type_=Integer))
+    result = sess.execute(stm2, {"year1":year_1,"year2":year_2}).fetchall()
+    print(result)
+get_directors_statistics(session,2000,3000)
+
+
+use cinematic;
+select * from
+directors dir left join
+movies mov on dir.director_id = mov.director_id
+where
+mov.year<2001 and mov.title like 'T%';
+select *
+from
+directors dir
+where
+dir.director_id IN (select mov.director_id from movies mov where mov.year<2001 and mov.title like 'T%');
+UPDATE directors
+SET directors.rating = directors.rating+1
+WHERE
+directors.director_id IN (select movies.director_id from movies where movies.year<2001 and movies.title like 'T%');
+
+
+Session = sessionmaker(bind=eng)
+session = Session()
+
+#1
+subq = session.query(Movies.director_id).filter(
+            and_(Movies.year < 2001, Movies.title.like('T%')))
+print(subq)
+session.query(Directors).filter(Directors.director_id.in_(subq)).update(
+            {'rating': (Directors.rating + 1)}, synchronize_session='fetch')
+session.commit()

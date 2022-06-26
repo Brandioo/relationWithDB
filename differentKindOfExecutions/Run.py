@@ -1,7 +1,7 @@
 from mysql.connector import connect, Error
 
 try:
-    with connect(host="localhost", user='root', password='Gonlinepro892!', database="cinematic") as conn:
+    with connect(host="localhost", user='root', password='Gonlinepro892!', database="cinematic_alchemy") as conn:
         print(conn)
         sql_statement = """
         select 1000
